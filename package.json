@@ -1,0 +1,302 @@
+{
+  "name": "background-ai-tasks",
+  "displayName": "Background AI Tasks",
+  "description": "Run AI tasks in the background while you continue coding. Select code, describe what you want, and let AI implement it asynchronously.",
+  "version": "0.1.0",
+  "publisher": "background-ai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/background-ai-tasks"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Machine Learning",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "copilot",
+    "code generation",
+    "background tasks",
+    "automation"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "backgroundAI.startTask",
+        "title": "Start AI Task",
+        "category": "Background AI",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "backgroundAI.cancelTask",
+        "title": "Cancel Task",
+        "category": "Background AI",
+        "icon": "$(close)"
+      },
+      {
+        "command": "backgroundAI.cancelAllTasks",
+        "title": "Cancel All Tasks",
+        "category": "Background AI"
+      },
+      {
+        "command": "backgroundAI.viewResult",
+        "title": "View Result",
+        "category": "Background AI",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "backgroundAI.applyResult",
+        "title": "Apply Result",
+        "category": "Background AI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "backgroundAI.dismissResult",
+        "title": "Dismiss Result",
+        "category": "Background AI",
+        "icon": "$(x)"
+      },
+      {
+        "command": "backgroundAI.retryTask",
+        "title": "Retry Task",
+        "category": "Background AI",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "backgroundAI.clearHistory",
+        "title": "Clear History",
+        "category": "Background AI"
+      },
+      {
+        "command": "backgroundAI.showPanel",
+        "title": "Show AI Tasks Panel",
+        "category": "Background AI"
+      },
+      {
+        "command": "backgroundAI.openSettings",
+        "title": "Open Settings",
+        "category": "Background AI"
+      },
+      {
+        "command": "backgroundAI.refreshTree",
+        "title": "Refresh",
+        "category": "Background AI",
+        "icon": "$(refresh)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "backgroundAI.startTask",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "backgroundAI.cancelAllTasks",
+        "key": "ctrl+shift+escape",
+        "mac": "cmd+shift+escape",
+        "when": "backgroundAI.hasActiveTasks"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "backgroundAI.startTask",
+          "when": "editorTextFocus",
+          "group": "1_modification@100"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "backgroundAI.refreshTree",
+          "when": "view == backgroundAITasks",
+          "group": "navigation"
+        },
+        {
+          "command": "backgroundAI.cancelAllTasks",
+          "when": "view == backgroundAITasks && backgroundAI.hasActiveTasks"
+        },
+        {
+          "command": "backgroundAI.clearHistory",
+          "when": "view == backgroundAITasks"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "backgroundAI.viewResult",
+          "when": "view == backgroundAITasks && viewItem == completedTask",
+          "group": "inline"
+        },
+        {
+          "command": "backgroundAI.applyResult",
+          "when": "view == backgroundAITasks && viewItem == completedTask",
+          "group": "inline"
+        },
+        {
+          "command": "backgroundAI.cancelTask",
+          "when": "view == backgroundAITasks && viewItem =~ /^(queuedTask|runningTask)$/",
+          "group": "inline"
+        },
+        {
+          "command": "backgroundAI.retryTask",
+          "when": "view == backgroundAITasks && viewItem == failedTask",
+          "group": "inline"
+        },
+        {
+          "command": "backgroundAI.dismissResult",
+          "when": "view == backgroundAITasks && viewItem == completedTask"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "backgroundAI.cancelTask",
+          "when": "false"
+        },
+        {
+          "command": "backgroundAI.viewResult",
+          "when": "false"
+        },
+        {
+          "command": "backgroundAI.applyResult",
+          "when": "false"
+        },
+        {
+          "command": "backgroundAI.dismissResult",
+          "when": "false"
+        },
+        {
+          "command": "backgroundAI.retryTask",
+          "when": "false"
+        },
+        {
+          "command": "backgroundAI.refreshTree",
+          "when": "false"
+        }
+      ]
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "backgroundAITasks",
+          "name": "AI Tasks",
+          "icon": "$(sparkle)",
+          "contextualTitle": "Background AI Tasks"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Background AI Tasks",
+      "properties": {
+        "backgroundAI.maxConcurrentTasks": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Maximum number of AI tasks that can run concurrently"
+        },
+        "backgroundAI.maxQueueSize": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 20,
+          "description": "Maximum number of tasks that can be queued"
+        },
+        "backgroundAI.defaultModel": {
+          "type": "string",
+          "default": "gpt-4o",
+          "description": "Preferred AI model family to use"
+        },
+        "backgroundAI.autoShowDiff": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically show diff view when a task completes"
+        },
+        "backgroundAI.notificationStyle": {
+          "type": "string",
+          "enum": [
+            "toast",
+            "statusBar",
+            "silent"
+          ],
+          "default": "toast",
+          "description": "How to notify when tasks complete"
+        },
+        "backgroundAI.showStatusBarItem": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show task count in status bar"
+        },
+        "backgroundAI.contextLines": {
+          "type": "number",
+          "default": 10,
+          "minimum": 0,
+          "maximum": 50,
+          "description": "Number of lines of context to include around selection"
+        },
+        "backgroundAI.logLevel": {
+          "type": "string",
+          "enum": [
+            "debug",
+            "info",
+            "warn",
+            "error"
+          ],
+          "default": "info",
+          "description": "Logging verbosity for diagnostics"
+        },
+        "backgroundAI.logPrompts": {
+          "type": "boolean",
+          "default": false,
+          "description": "Log full prompts sent to AI (contains your code - enable for debugging only)"
+        },
+        "backgroundAI.logResponses": {
+          "type": "boolean",
+          "default": false,
+          "description": "Log full AI responses (enable for debugging only)"
+        },
+        "backgroundAI.logTokenUsage": {
+          "type": "boolean",
+          "default": true,
+          "description": "Log token usage statistics for monitoring"
+        },
+        "backgroundAI.logPerformanceMetrics": {
+          "type": "boolean",
+          "default": true,
+          "description": "Log performance metrics (duration, tokens per second)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && node esbuild.js",
+    "check-types": "tsc --noEmit",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && node esbuild.js --production",
+    "lint": "eslint src",
+    "test": "vscode-test",
+    "test:unit": "mocha --require ts-node/register 'src/**/*.test.ts'"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "@vscode/test-cli": "^0.0.4",
+    "@vscode/test-electron": "^2.3.8",
+    "esbuild": "^0.20.0",
+    "eslint": "^8.56.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.3.3"
+  }
+}

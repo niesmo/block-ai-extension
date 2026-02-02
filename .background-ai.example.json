@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "title": "Background AI Tasks Configuration",
+  "description": "Workspace configuration for Background AI Tasks extension",
+  "type": "object",
+  "properties": {
+    "maxConcurrentTasks": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 10,
+      "default": 3,
+      "description": "Maximum number of AI tasks to process simultaneously"
+    },
+    "autoShowDiff": {
+      "type": "boolean",
+      "default": true,
+      "description": "Automatically show diff view when a task completes"
+    },
+    "includeFullContext": {
+      "type": "boolean",
+      "default": false,
+      "description": "Include surrounding code for better AI context"
+    },
+    "maxContextLines": {
+      "type": "number",
+      "minimum": 10,
+      "maximum": 200,
+      "default": 50,
+      "description": "Maximum lines of surrounding context to include"
+    },
+    "promptTemplates": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Custom prompt templates (name -> template string)",
+      "examples": [
+        {
+          "implement": "Implement this interface with all methods",
+          "document": "Add comprehensive documentation comments",
+          "test": "Write unit tests for this code"
+        }
+      ]
+    },
+    "contextFiles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Additional files to include as context for AI tasks",
+      "examples": [
+        ["README.md", "docs/architecture.md", ".cursorrules"]
+      ]
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Custom rules for AI to follow when generating code",
+      "examples": [
+        [
+          "Follow the existing code style",
+          "Use async/await instead of callbacks",
+          "Always add error handling"
+        ]
+      ]
+    },
+    "languageOverrides": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "rules": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "contextFiles": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "description": "Language-specific configuration overrides",
+      "examples": [
+        {
+          "typescript": {
+            "rules": ["Use strict TypeScript types", "Prefer interfaces over type aliases"],
+            "contextFiles": ["tsconfig.json"]
+          },
+          "python": {
+            "rules": ["Use type hints", "Follow PEP 8 style guide"],
+            "contextFiles": ["pyproject.toml"]
+          }
+        }
+      ]
+    }
+  }
+}
