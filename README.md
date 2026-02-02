@@ -87,6 +87,10 @@ Click the status bar item to open the AI Tasks panel.
 | `backgroundAI.showStatusBarProgress` | true | Show task progress in status bar |
 | `backgroundAI.autoArchiveAfterApply` | true | Archive tasks after applying results |
 | `backgroundAI.logLevel` | "info" | Logging level (debug, info, warn, error) |
+| `backgroundAI.logPrompts` | false | Log prompts sent to AI (for transparency/debugging) |
+| `backgroundAI.logResponses` | false | Log AI responses (for transparency/debugging) |
+| `backgroundAI.logTokenUsage` | true | Log token usage statistics |
+| `backgroundAI.logPerformanceMetrics` | true | Log performance metrics |
 
 ## Keyboard Shortcuts
 
