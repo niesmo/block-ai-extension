@@ -16,7 +16,7 @@ export class ViewResultCommand implements vscode.Disposable {
 
   constructor(
     private taskQueue: TaskQueue,
-    private resultDocProvider: ResultDocumentProvider
+    _resultDocProvider: ResultDocumentProvider
   ) {}
 
   /**
@@ -43,8 +43,7 @@ export class ViewResultCommand implements vscode.Disposable {
       const originalUri = vscode.Uri.parse(task.context.documentUri);
       const document = await vscode.workspace.openTextDocument(originalUri);
       
-      // Create a title for display
-      const fileName = task.context.relativePath.split(/[/\\]/).pop() || 'code';
+      // Create a title for display  
       const promptPreview = task.prompt.substring(0, 30) + (task.prompt.length > 30 ? '...' : '');
 
       // Show the original document

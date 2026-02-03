@@ -23,6 +23,12 @@ export interface ExtensionSettings {
   logResponses: boolean;
   logTokenUsage: boolean;
   logPerformanceMetrics: boolean;
+  // Inline feedback settings
+  showPendingIndicators: boolean;
+  showInlineSuggestions: boolean;
+  autoDismissOnFailure: boolean;
+  failureIndicatorDuration: number;
+  persistSuggestions: boolean;
 }
 
 /**
@@ -42,6 +48,12 @@ const DEFAULT_SETTINGS: ExtensionSettings = {
   logResponses: false,
   logTokenUsage: true,
   logPerformanceMetrics: true,
+  // Inline feedback defaults
+  showPendingIndicators: true,
+  showInlineSuggestions: true,
+  autoDismissOnFailure: true,
+  failureIndicatorDuration: 3000,
+  persistSuggestions: true,
 };
 
 const CONFIG_SECTION = 'backgroundAI';
@@ -90,6 +102,11 @@ export class ConfigService implements vscode.Disposable {
       logResponses: this.get('logResponses', DEFAULT_SETTINGS.logResponses),
       logTokenUsage: this.get('logTokenUsage', DEFAULT_SETTINGS.logTokenUsage),
       logPerformanceMetrics: this.get('logPerformanceMetrics', DEFAULT_SETTINGS.logPerformanceMetrics),
+      showPendingIndicators: this.get('showPendingIndicators', DEFAULT_SETTINGS.showPendingIndicators),
+      showInlineSuggestions: this.get('showInlineSuggestions', DEFAULT_SETTINGS.showInlineSuggestions),
+      autoDismissOnFailure: this.get('autoDismissOnFailure', DEFAULT_SETTINGS.autoDismissOnFailure),
+      failureIndicatorDuration: this.get('failureIndicatorDuration', DEFAULT_SETTINGS.failureIndicatorDuration),
+      persistSuggestions: this.get('persistSuggestions', DEFAULT_SETTINGS.persistSuggestions),
     };
 
     return this.cachedSettings;

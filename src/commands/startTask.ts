@@ -8,7 +8,7 @@ import { TaskQueue } from '../services/taskQueue';
 import { CopilotService } from '../services/copilotService';
 import { EventBus } from '../services/eventBus';
 import { ConfigService } from '../services/configService';
-import { extractSelectionContext, extractExpandedContext } from '../utils/context';
+import { extractExpandedContext } from '../utils/context';
 import { getLogger } from '../utils/logging';
 import { AIResult } from '../models/task';
 import { ErrorInfo } from '../models/result';
@@ -131,7 +131,7 @@ export class StartTaskCommand implements vscode.Disposable {
       let resolved = false;
 
       inputBox.onDidAccept(() => {
-        if (resolved) return;
+        if (resolved) {return;}
         resolved = true;
         const value = inputBox.value.trim();
         logger.debug('Input box accepted', { value: value.substring(0, 30) });
@@ -141,7 +141,7 @@ export class StartTaskCommand implements vscode.Disposable {
       });
 
       inputBox.onDidHide(() => {
-        if (resolved) return;
+        if (resolved) {return;}
         resolved = true;
         logger.debug('Input box hidden without accept');
         inputBox.dispose();

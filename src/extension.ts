@@ -6,6 +6,7 @@ import { ConfigService } from './services/configService';
 import { EventBus } from './services/eventBus';
 import { TaskTreeProvider } from './providers/taskTreeProvider';
 import { getLogger, disposeLogger } from './utils/logging';
+import { getInlineFeedbackProvider, disposeInlineFeedbackProvider } from './providers/inlineFeedbackProvider';
 
 let statusBarItem: vscode.StatusBarItem;
 
@@ -18,6 +19,18 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const configService = new ConfigService();
   const taskQueue = new TaskQueue(eventBus, configService);
   const copilotService = new CopilotService(eventBus, configService);
+
+  // Initialize inline feedback provider (singleton)
+  const inlineFeedbackProvider = getInlineFeedbackProvider();
+  
+  // Register CodeLens provider for Accept/Reject buttons
+  context.subscriptions.push(
+    vscode.languages.registerCodeLensProvider({ scheme: 'file' }, inlineFeedbackProvider)
+  );
+
+  // Store globally for command access
+  // @ts-ignore
+  globalThis.inlineFeedbackProvider = inlineFeedbackProvider;
 
   // Set log level from config
   const settings = configService.getSettings();
@@ -86,6 +99,83 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   );
   updateStatusBar();
 
+  // ==============================================
+  // INLINE FEEDBACK INTEGRATION
+  // ==============================================
+
+  // When a task is created, show the "Implementing..." pending indicator
+  eventBus.on('task:created', (e) => {
+    const editor = vscode.window.activeTextEditor;
+    if (editor) {
+      const range = new vscode.Range(
+        editor.selection.start.line,
+        editor.selection.start.character,
+        editor.selection.end.line,
+        editor.selection.end.character
+      );
+      
+      // Show the pending indicator with spinning animation
+      const suggestionId = inlineFeedbackProvider.showPendingIndicator(e.task.id, editor, range);
+      logger.info(`Showing pending indicator for task ${e.task.id}, suggestionId: ${suggestionId}`);
+    }
+  });
+
+  // When a task fails, dismiss the pending indicator
+  eventBus.on('task:failed', (e) => {
+    logger.info(`Task ${e.taskId} failed, dismissing indicator`);
+    inlineFeedbackProvider.dismissPending(e.taskId);
+  });
+
+  // When a task is cancelled, dismiss the pending indicator
+  eventBus.on('task:cancelled', (e) => {
+    logger.info(`Task ${e.taskId} cancelled, dismissing indicator`);
+    inlineFeedbackProvider.dismissPending(e.taskId);
+  });
+
+  // When a task completes with generated code, show the inline suggestion
+  eventBus.on('task:completed', async (e) => {
+    if (e.result && e.result.generatedCode) {
+      logger.info(`Task ${e.taskId} completed with generated code, showing suggestion`);
+      
+      // Find the suggestion for this task
+      const suggestion = inlineFeedbackProvider.getSuggestionForTask(e.taskId);
+      if (suggestion) {
+        await inlineFeedbackProvider.showSuggestion(suggestion.id, e.result.generatedCode);
+      } else {
+        logger.warn(`No pending suggestion found for task ${e.taskId}`);
+      }
+    }
+  });
+
+  // Register Accept/Reject commands with inline feedback provider
+  context.subscriptions.push(
+    vscode.commands.registerCommand('backgroundAI.acceptSuggestion', async (suggestionId?: string) => {
+      // If no suggestionId provided, use the focused suggestion
+      const targetId = suggestionId || inlineFeedbackProvider.getFocusedSuggestion()?.id;
+      if (targetId) {
+        await inlineFeedbackProvider.acceptSuggestion(targetId);
+      } else {
+        vscode.window.showWarningMessage('No AI suggestion to accept');
+      }
+    }),
+    
+    vscode.commands.registerCommand('backgroundAI.rejectSuggestion', async (suggestionId?: string) => {
+      // If no suggestionId provided, use the focused suggestion
+      const targetId = suggestionId || inlineFeedbackProvider.getFocusedSuggestion()?.id;
+      if (targetId) {
+        await inlineFeedbackProvider.rejectSuggestion(targetId);
+      } else {
+        vscode.window.showWarningMessage('No AI suggestion to reject');
+      }
+    })
+  );
+
+  // ==============================================
+  // END INLINE FEEDBACK INTEGRATION
+  // ==============================================
+  
+  context.subscriptions.push(inlineFeedbackProvider);
+
   // Set initial context
   vscode.commands.executeCommand('setContext', 'backgroundAI.hasActiveTasks', false);
 
@@ -98,6 +188,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 export function deactivate(): void {
   const logger = getLogger();
   logger.info('Background AI Tasks extension deactivating...');
+
+  disposeInlineFeedbackProvider();
 
   if (statusBarItem) {
     statusBarItem.dispose();
