@@ -30,6 +30,12 @@ export const CommandIds = {
   showLogs: 'backgroundAI.showLogs',
   refreshTasks: 'backgroundAI.refreshTasks',
   cancelAllTasks: 'backgroundAI.cancelAllTasks',
+  // Inline feedback commands
+  acceptSuggestion: 'backgroundAI.acceptSuggestion',
+  rejectSuggestion: 'backgroundAI.rejectSuggestion',
+  dismissIndicator: 'backgroundAI.dismissIndicator',
+  nextSuggestion: 'backgroundAI.nextSuggestion',
+  prevSuggestion: 'backgroundAI.prevSuggestion',
 } as const;
 
 /**

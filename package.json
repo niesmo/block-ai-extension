@@ -89,7 +89,37 @@
         "title": "Refresh",
         "category": "Background AI",
         "icon": "$(refresh)"
-      }
+      },
+      {
+        "command": "backgroundAI.acceptSuggestion",
+        "title": "Accept Inline Suggestion",
+        "category": "Background AI",
+        "icon": "$(check)"
+      },
+      {
+          "command": "backgroundAI.rejectSuggestion",
+          "title": "Reject Inline Suggestion",
+          "category": "Background AI",
+          "icon": "$(x)"
+        },
+        {
+          "command": "backgroundAI.dismissIndicator",
+          "title": "Dismiss Inline Indicator",
+          "category": "Background AI",
+          "icon": "$(circle-slash)"
+        },
+        {
+          "command": "backgroundAI.nextSuggestion",
+          "title": "Next Inline Suggestion",
+          "category": "Background AI",
+          "icon": "$(arrow-right)"
+        },
+        {
+          "command": "backgroundAI.prevSuggestion",
+          "title": "Previous Inline Suggestion",
+          "category": "Background AI",
+          "icon": "$(arrow-left)"
+        }
     ],
     "keybindings": [
       {
@@ -103,7 +133,30 @@
         "key": "ctrl+shift+escape",
         "mac": "cmd+shift+escape",
         "when": "backgroundAI.hasActiveTasks"
-      }
+      },
+      {
+        "command": "backgroundAI.acceptSuggestion",
+          "key": "ctrl+enter",
+          "mac": "cmd+enter",
+          "when": "backgroundAI.hasFocusedSuggestion"
+        },
+        {
+          "command": "backgroundAI.rejectSuggestion",
+          "key": "escape",
+          "when": "backgroundAI.hasFocusedSuggestion"
+        },
+        {
+          "command": "backgroundAI.nextSuggestion",
+          "key": "alt+]",
+          "mac": "alt+]",
+          "when": "backgroundAI.hasVisibleSuggestions"
+        },
+        {
+          "command": "backgroundAI.prevSuggestion",
+          "key": "alt+[",
+          "mac": "alt+[",
+          "when": "backgroundAI.hasVisibleSuggestions"
+        }
     ],
     "menus": {
       "editor/context": [
@@ -111,6 +164,16 @@
           "command": "backgroundAI.startTask",
           "when": "editorTextFocus",
           "group": "1_modification@100"
+        },
+        {
+          "command": "backgroundAI.acceptSuggestion",
+          "when": "editorTextFocus && backgroundAI.hasFocusedSuggestion",
+          "group": "1_modification@101"
+        },
+        {
+          "command": "backgroundAI.rejectSuggestion",
+          "when": "editorTextFocus && backgroundAI.hasFocusedSuggestion",
+          "group": "1_modification@102"
         }
       ],
       "view/title": [
@@ -270,6 +333,52 @@
           "type": "boolean",
           "default": true,
           "description": "Log performance metrics (duration, tokens per second)"
+        },
+        "backgroundAI.inline.showPendingIndicators": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show visual indicators above code when AI tasks are processing"
+        },
+        "backgroundAI.inline.showInlineSuggestions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Display AI-generated code suggestions inline in the editor"
+        },
+        "backgroundAI.inline.autoDismissOnFailure": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically dismiss pending indicators when tasks fail"
+        },
+        "backgroundAI.inline.failureIndicatorDuration": {
+          "type": "number",
+          "default": 3000,
+          "minimum": 1000,
+          "maximum": 10000,
+          "description": "Duration (ms) to show failure indicator before auto-dismiss"
+        },
+        "backgroundAI.inline.pendingIndicatorStyle": {
+          "type": "string",
+          "enum": ["background", "border", "gutter"],
+          "default": "background",
+          "description": "Visual style for pending task indicators"
+        },
+        "backgroundAI.inline.suggestionStyle": {
+          "type": "string",
+          "enum": ["background", "border", "diff"],
+          "default": "background",
+          "description": "Visual style for code suggestions"
+        },
+        "backgroundAI.inline.persistSuggestions": {
+          "type": "boolean",
+          "default": false,
+          "description": "Keep unreviewed suggestions when closing files or VS Code"
+        },
+        "backgroundAI.inline.maxIndicatorsPerFile": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 50,
+          "description": "Maximum number of simultaneous indicators allowed per file"
         }
       }
     }
@@ -282,7 +391,7 @@
     "watch:esbuild": "node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "package": "npm run check-types && node esbuild.js --production",
-    "lint": "eslint src",
+    "lint": "eslint src --fix",
     "test": "vscode-test",
     "test:unit": "mocha --require ts-node/register 'src/**/*.test.ts'"
   },
